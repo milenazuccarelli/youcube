@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+
+<head>
+    <title>YouCube</title>
+    <script>
+        var props = { status: "", handle: null };
+        var windows = [];
+        
+        var currentNumber = 0;
+
+        function openClose(number, state, url) {
+            if (!windows[number]) {
+                windows[number] = {
+                    status: "open",
+                    url: url,
+                    handle: null
+                }
+
+                var w = Math.random() * window.innerWidth;
+                var h = Math.random() * window.innerHeight;
+                windows[number].handle = window.open(windows[number].url, 'video ' + number, 'height=250, width=330, left=' + w + ', top=' + h);
+            }
+            else if (currentNumber !== number && state === 0) {
+                windows[number].handle.close();
+                windows[number].handle = null;
+                windows[number].status = "closed";
+            }
+            else if (currentNumber !== number && state === 1) {
+                windows[number].status = "open";
+                var w = Math.random() * window.innerWidth;
+                var h = Math.random() * window.innerHeight;
+                windows[number].handle = window.open(windows[number].url, 'video ' + number, 'height=250, width=330, left=' + w + ', top=' + h);
+            }
+
+            currentNumber = number;
+        }
+
+        function playClip(json) {
+            if (json.cube === "1") {
+                openClose(0, parseInt(json.state), "https://www.youtube.com/embed/8eo-L_3OWAQ?autoplay=1");
+            }
+            if (json.cube === "2") {
+                openClose(1, parseInt(json.state), "https://www.youtube.com/embed/PdS0OY9i15k?autoplay=1")
+            }
+            if (json.cube === "3") {
+                openClose(2, parseInt(json.state), "https://www.youtube.com/embed/avtYNFqspew?autoplay=1")
+            }
+            if (json.cube === "4") {
+                openClose(3, parseInt(json.state), "https://www.youtube.com/embed/923uTY2q71I?autoplay=1")
+            }
+            if (json.cube === "5") {
+                openClose(4, parseInt(json.state), "https://www.youtube.com/embed/xoxCItHxLiM?autoplay=1")
+            }
+            if (json.cube === "6") {
+                openClose(5, parseInt(json.state), "https://www.youtube.com/embed/Lzi7ljJiLJQ?autoplay=1")
+            }
+            if (json.cube === "7") {
+                openClose(6, parseInt(json.state), "https://www.youtube.com/embed/f4gteIDTBTE?autoplay=1")
+            }
+            if (json.cube === "8") {
+                openClose(7, parseInt(json.state), "https://www.youtube.com/embed/NxpPGwI-hTw?autoplay=1")
+            }
+            if (json.cube === "9") {
+                openClose(8, parseInt(json.state), "https://www.youtube.com/embed/sSRJvq4Wd48?autoplay=1")
+            }
+            if (json.cube === "10") {
+                openClose(9, parseInt(json.state), "https://www.youtube.com/embed/1E_PnRdwffM?autoplay=1")
+            }
+            if (json.cube === "11") {
+                openClose(10, parseInt(json.state), "https://www.youtube.com/embed/AzfbEymarns?autoplay=1")
+            }
+            if (json.cube === "12") {
+                openClose(11, parseInt(json.state), "https://www.youtube.com/embed/g4kO9wfrSKA?autoplay=1")
+            }
+        }
+
+        /*function playClip(number) {
+            switch (number) {
+                case 1:
+                    openClose(0, "https://www.youtube.com/embed/8eo-L_3OWAQ?autoplay=1");
+                    break;
+                case 2:
+                    openClose(1, "https://www.youtube.com/embed/PdS0OY9i15k?autoplay=1")
+                    break;
+                case 3:
+                    openClose(2, "https://www.youtube.com/embed/avtYNFqspew?autoplay=1")
+                    break;
+                case 4:
+                    openClose(3, "https://www.youtube.com/embed/923uTY2q71I?autoplay=1")
+                    break;
+                case 5:
+                    openClose(4, "https://www.youtube.com/embed/xoxCItHxLiM?autoplay=1")
+                    break;
+                case 6:
+                    openClose(5, "https://www.youtube.com/embed/Lzi7ljJiLJQ?autoplay=1")
+                    break;
+                case 7:
+                    openClose(6, "https://www.youtube.com/embed/f4gteIDTBTE?autoplay=1")
+                    break;
+                case 8:
+                    openClose(7, "https://www.youtube.com/embed/NxpPGwI-hTw?autoplay=1")
+                    break;
+                case 9:
+                    openClose(8, "https://www.youtube.com/embed/sSRJvq4Wd48?autoplay=1")
+                    break;
+                case 10:
+                    openClose(9, "https://www.youtube.com/embed/1E_PnRdwffM?autoplay=1")
+                    break;
+                case 11:
+                    openClose(10, "https://www.youtube.com/embed/AzfbEymarns?autoplay=1")
+                    break;
+                case 12:
+                    openClose(11, "https://www.youtube.com/embed/g4kO9wfrSKA?autoplay=1")
+                    break;
+                    console.log("hello");
+            }
+        }*/
+
+        function getNumber() {
+            //console.log("getting number from server");
+            var xhttp = new XMLHttpRequest();
+            xhttp.onreadystatechange = function () {
+                if (this.readyState == 4 && this.status == 200) {
+                    //console.log("response from server " + JSON.parse(this.responseText));
+                    playClip(JSON.parse(this.responseText));
+                }
+            };
+            xhttp.open("GET", "http://localhost:8080/number", true);
+            xhttp.send();
+        }
+
+        var timerId = setInterval("getNumber()", 5000); 
+    </script>
+</head>
+
+<body>
+
+</body>
+
+</html>
