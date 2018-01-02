@@ -10,9 +10,10 @@ Adafruit_MPR121 cap = Adafruit_MPR121();
 // so we know when buttons are 'released'
 uint16_t lasttouched = 0;
 uint16_t currtouched = 0;
-uint8_t  captouched = 0;
-uint8_t  captouchedcurrent = 0;
-uint8_t  capcount[12] = {0,0,0,0,0,0,0,0,0,0,0,0};
+uint8_t captouched = 0;
+uint8_t captouchedcurrent = 0;
+boolean capcount[12] = {false,false,false,false,false,false,false,false,false,false,false,false};
+boolean keypressed = false;
 
 const char* ssid = "vodafone-965C";
 const char* password =  "GEM2VB79BNXWFR";
@@ -36,7 +37,7 @@ void setup() {
 
   Serial.println("Adafruit MPR121 Capacitive Touch sensor test");
 
-  delay(2000);
+  delay(1500);
 
   // Default address is 0x5A, if tied to 3.3V its 0x5B
   // If tied to SDA its 0x5C and if SCL then 0x5D
@@ -59,25 +60,29 @@ void loop() {
     if (!(currtouched & _BV(i)) && (lasttouched & _BV(i)) ) {
       Serial.print(i); Serial.println(" released");
       captouched = i;
+      keypressed = true;
       break;
     }
   }
 
   // reset our state
   lasttouched = currtouched;
-  
-  if (captouched == captouchedcurrent && capcount[captouched] == 1) {
-    capcount[captouched] = 0;
-  } else if(captouched != captouchedcurrent && capcount[captouched] == 0) {
-    capcount[captouched] = 1;
-  }
-  
-  if (captouched > 0) {
+
+  if (keypressed) {
+
+    Serial.println("debug " + String(captouched));
+    Serial.println("debug " + String(capcount[captouched]));
+    
+    if (capcount[captouched]) {
+      capcount[captouched] = false;
+    } else {
+      capcount[captouched] = true;
+    }
 
     if (WiFi.status() == WL_CONNECTED) { //Check WiFi connection status
 
       HTTPClient http;
-      String httpString = String("http://192.168.1.34:8080/update?cube=") + String(captouched) + "&count=" + String(capcount[captouched]);
+      String httpString = String("http://192.168.1.34:8080/update?cube=") + String(captouched) + "&state=" + String(capcount[captouched]);
       Serial.println(httpString);
 
       http.begin(httpString);  //Specify destination for HTTP request
@@ -106,10 +111,11 @@ void loop() {
       Serial.println("Error in WiFi connection");
     }
   }
-  
-  captouchedcurrent = captouched;
 
-  delay(300);
+  captouchedcurrent = captouched;
+  keypressed = false;
+
+  delay(220);
 
 }
 
