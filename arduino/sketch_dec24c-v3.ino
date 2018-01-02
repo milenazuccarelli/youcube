@@ -1,29 +1,23 @@
 #include <WiFi.h>
 #include <HTTPClient.h>
-
 #include <Wire.h>
 #include "Adafruit_MPR121.h"
 
 Adafruit_MPR121 cap = Adafruit_MPR121();
 
-// Keeps track of the last pins touched
-// so we know when buttons are 'released'
 uint16_t lasttouched = 0;
 uint16_t currtouched = 0;
 uint8_t captouched = 0;
-uint8_t captouchedcurrent = 0;
-boolean capcount[12] = {false,false,false,false,false,false,false,false,false,false,false,false};
+boolean capcount[12] = {false, false, false, false, false, false, false, false, false, false, false, false};
 boolean keypressed = false;
 
-const char* ssid = "vodafone-965C";
-const char* password =  "GEM2VB79BNXWFR";
+const char* ssid = "SSID HERE";
+const char* password =  "PASSWORD HERE";
 
 void setup() {
-
   Serial.begin(9600);
-
   WiFi.begin(ssid, password);
-
+  
   while (WiFi.status() != WL_CONNECTED) {
     delay(500);
     Serial.println("Connecting to WiFi..");
@@ -31,13 +25,13 @@ void setup() {
 
   Serial.println("Connected to the WiFi network");
 
-  while (!Serial) { // needed to keep leonardo/micro from starting too fast!
+  while (!Serial) { 
     delay(10);
   }
 
   Serial.println("Adafruit MPR121 Capacitive Touch sensor test");
 
-  delay(1500);
+  delay(2000);
 
   // Default address is 0x5A, if tied to 3.3V its 0x5B
   // If tied to SDA its 0x5C and if SCL then 0x5D
@@ -72,51 +66,37 @@ void loop() {
 
     Serial.println("debug " + String(captouched));
     Serial.println("debug " + String(capcount[captouched]));
-    
+
     if (capcount[captouched]) {
       capcount[captouched] = false;
     } else {
       capcount[captouched] = true;
     }
 
-    if (WiFi.status() == WL_CONNECTED) { //Check WiFi connection status
-
+    if (WiFi.status() == WL_CONNECTED) { 
       HTTPClient http;
       String httpString = String("http://192.168.1.34:8080/update?cube=") + String(captouched) + "&state=" + String(capcount[captouched]);
       Serial.println(httpString);
 
-      http.begin(httpString);  //Specify destination for HTTP request
-      http.addHeader("Content-Type", "text/plain");             //Specify content-type header
+      http.begin(httpString);  
+      http.addHeader("Content-Type", "text/plain");             
 
-      int httpResponseCode = http.POST("POSTING from ESP32");   //Send the actual POST request
+      int httpResponseCode = http.POST("POSTING from ESP32");   
 
       if (httpResponseCode > 0) {
+        String response = http.getString();                      
 
-        String response = http.getString();                       //Get the response to the request
-
-        Serial.println(httpResponseCode);   //Print return code
-        Serial.println(response);           //Print request answer
-
-      } else {
-
-        Serial.print("Error on sending POST: ");
-        Serial.println(httpResponseCode);
-
-      }
-
-      http.end();  //Free resources
-
+        //Serial.println(httpResponseCode);  
+        //Serial.println(response);           
+      } 
+      http.end();  
     } else {
-
       Serial.println("Error in WiFi connection");
     }
   }
-
-  captouchedcurrent = captouched;
   keypressed = false;
 
-  delay(220);
-
+  delay(350);
 }
 
 
